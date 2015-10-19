@@ -26,6 +26,9 @@ include Makefile.in.$(PLATFORM)
 lshallow: ldriver.o shallow2d.o stepper.o
 	$(CC) $(CFLAGS) $(LUA_CFLAGS) -o $@ $^ $(LUA_LIBS)
 
+offload_test: offload_test.c
+	$(CC) $(CFLAGS) offload_test.c -o offload_test
+
 ldriver.o: ldriver.c shallow2d.h
 	$(CC) $(CFLAGS) $(LUA_CFLAGS) -c $<
 

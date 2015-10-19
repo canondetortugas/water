@@ -31,17 +31,27 @@ void shallow2dv_flux(float* restrict fh,
                      float g,
                      int ncell)
 {
-  /* fh = hu, gh = fv, from the flux equations */
+  /* fh = hu, gh = hv, from the flux equations */
     memcpy(fh, hu, ncell * sizeof(float));
     memcpy(gh, hv, ncell * sizeof(float));
-    for (int i = 0; i < ncell; ++i) {
-        float hi = h[i], hui = hu[i], hvi = hv[i];
-        float inv_h = 1/hi;
-        fhu[i] = hui*hui*inv_h + (0.5f*g)*hi*hi;
-        fhv[i] = hui*hvi*inv_h;
-        ghu[i] = hui*hvi*inv_h;
-        ghv[i] = hvi*hvi*inv_h + (0.5f*g)*hi*hi;
-    }
+
+#pragma offload target(mic) \
+  in(h,hu,hv:length(ncell)), inout(fhu,fhv,ghu,ghv:length(ncell))
+    {
+/* #pragma omp parallel */
+/*       { */
+/* #pragma omp parallel for	/\*  *\/ */
+	for (int i = 0; i < ncell; ++i) 
+	  {
+	    float hi = h[i], hui = hu[i], hvi = hv[i];
+	    float inv_h = 1/hi;
+	    fhu[i] = hui*hui*inv_h + (0.5f*g)*hi*hi;
+	    fhv[i] = hui*hvi*inv_h;
+	    ghu[i] = hui*hvi*inv_h;
+	    ghv[i] = hvi*hvi*inv_h + (0.5f*g)*hi*hi;
+	  }
+      }
+    /* } */
 }
 
 

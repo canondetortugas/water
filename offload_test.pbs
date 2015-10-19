@@ -2,10 +2,10 @@
 
 #PBS -l nodes=1:ppn=24
 #PBS -l walltime=0:30:00
-#PBS -N lshallow
+#PBS -N offload_test
 #PBS -j oe
 
 module load cs5220
 cd $PBS_O_WORKDIR
 export OFFLOAD_REPORT=2
-./lshallow tests.lua dam 1000
+./offload_test
