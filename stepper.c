@@ -475,13 +475,12 @@ int central2d_xrun(float* restrict u, float* restrict v,
             }
             //#pragma omp critical
             */
-            {
-                for(int k = 0;k<nfield;++k){
+            
+            for(int k = 0;k<nfield;++k){
                     memcpy(u+k*nx_all*ny_all+(nx_all*(ng+blocksize*curthread)),(ublock[curthread]+k*nx_all*(2*NBATCH+blocksize)+NBATCH*nx_all),(nx_all*(blocksize))* sizeof(float));
-                    memcpy(v+k*nx_all*ny_all+(nx_all*(ng+blocksize*curthread)),(vblock[curthread]+k*nx_all*(2*NBATCH+blocksize)+NBATCH*nx_all),(nx_all*(blocksize))* sizeof(float));
-                    memcpy(f+k*nx_all*ny_all+(nx_all*(ng+blocksize*curthread)),(fblock[curthread]+k*nx_all*(2*NBATCH+blocksize)+NBATCH*nx_all),(nx_all*(blocksize))* sizeof(float));
-                    memcpy(g+k*nx_all*ny_all+(nx_all*(ng+blocksize*curthread)),(gblock[curthread]+k*nx_all*(2*NBATCH+blocksize)+NBATCH*nx_all),(nx_all*(blocksize))* sizeof(float));
-                }
+                memcpy(v+k*nx_all*ny_all+(nx_all*(ng+blocksize*curthread)),(vblock[curthread]+k*nx_all*(2*NBATCH+blocksize)+NBATCH*nx_all),(nx_all*(blocksize))* sizeof(float));
+                memcpy(f+k*nx_all*ny_all+(nx_all*(ng+blocksize*curthread)),(fblock[curthread]+k*nx_all*(2*NBATCH+blocksize)+NBATCH*nx_all),(nx_all*(blocksize))* sizeof(float));
+                memcpy(g+k*nx_all*ny_all+(nx_all*(ng+blocksize*curthread)),(gblock[curthread]+k*nx_all*(2*NBATCH+blocksize)+NBATCH*nx_all),(nx_all*(blocksize))* sizeof(float));
             }
 
             #pragma omp barrier
