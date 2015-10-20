@@ -345,17 +345,18 @@ void central2d_step_i(float* restrict u, float* restrict v,
                       nx_all, ny_all, nfield);
 	
     // Copy from v storage back to main grid
+	/*
     for (int j = ng; j < ny+ng; ++j){
 		for (int i = ng; i < nx+ng; ++i){
 			u[j*nx_all+i] = v[(j-io)*nx_all+i-io];
 			u[nx_all*ny_all+j*nx_all+i] = v[nx_all*ny_all+(j-io)*nx_all+i-io];
 			u[nx_all*ny_all*2+j*nx_all+i] = v[nx_all*ny_all*2+(j-io)*nx_all+i-io];
 		}
-	}
-	/*memcpy(u+(ng)*nx_all+ng,
+	}*/
+	
+	memcpy(u+(ng)*nx_all+ng,
            v+(ng-io)*nx_all+ng-io,
            (nfield*ny_all-ng) * nx_all * sizeof(float));
-	*/
 	/*if(io==1&&numthread==0){
 		printf("check 1\n");
 		fflush(stdout);
@@ -401,13 +402,15 @@ int central2d_xrun(float* restrict u, float* restrict v,
 	float** sblock=(float**)malloc(NUMPARA* sizeof(float*));
 	
 	int blocksize = ny/NUMPARA;
-	
+	int myN= (nx_all*nfield*(2*NBATCH+blocksize));
+	ublock[0] = (float*)malloc(NUMPARA*(4*myN+nx_all*6)* sizeof(float));
 	for(int i=0;i<NUMPARA;++i){
-		ublock[i] = (float*)malloc((nx_all*nfield*(2*NBATCH+blocksize))* sizeof(float));
-		vblock[i] = (float*)malloc((nx_all*nfield*(2*NBATCH+blocksize))* sizeof(float));
-		fblock[i] = (float*)malloc((nx_all*nfield*(2*NBATCH+blocksize))* sizeof(float));
-		gblock[i] = (float*)malloc((nx_all*nfield*(2*NBATCH+blocksize))* sizeof(float));
-		sblock[i] = (float*)malloc(nx_all*6* sizeof(float));
+		
+		if(i!=0)ublock[i] = ublock[0]+(4*myN+nx_all*6)*i;
+		vblock[i] = ublock[i]+myN;
+		fblock[i] = vblock[i]+myN;
+		gblock[i] = fblock[i]+myN;
+		sblock[i] = gblock[i]+myN;
 	}
     while (!done) {
 		
@@ -423,6 +426,7 @@ int central2d_xrun(float* restrict u, float* restrict v,
 		#pragma omp parallel num_threads(NUMPARA)
 		{
 			int curthread = omp_get_thread_num();
+			
 /*			float tmpadd=0;
 			for(int sos = ng;sos<nx+ng;++sos){
 				tmpadd+=u[(nx_all*(blocksize*curthread))+nx_all*ng+sos];
@@ -487,13 +491,7 @@ int central2d_xrun(float* restrict u, float* restrict v,
 		t =t+NBATCH*dt;
 		nstep = nstep+NBATCH;		
     }
-	for(int i=0;i<NUMPARA;++i){
-		free(ublock[i]);
-		free(vblock[i]);
-		free(fblock[i]);
-		free(gblock[i]);
-		free(sblock[i]);
-	}
+	free(ublock[0]);
     return nstep;
 }
 

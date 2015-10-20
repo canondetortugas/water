@@ -5,7 +5,10 @@ Total compute time: 7.094216e-01
 dam 20 para NBATCH 6 : 2 2 400 400 0.45 50 0.01
 Total compute time: 9.555640e-01
 
-dam serial para: 2 2 400 400 0.45 50 0.01
+dam serial: 2 2 400 400 0.45 50 0.01
 Total compute time: 2.884525e+00
 
+wave serial 6 :2 2 400 400 0.45 100 0.01
+Total compute time: 5.125248e+00
 
+wave 10 para  :1.478831e+00
