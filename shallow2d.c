@@ -35,12 +35,14 @@ void shallow2dv_flux(float* restrict fh,
     memcpy(fh, hu, ncell * sizeof(float));
     memcpy(gh, hv, ncell * sizeof(float));
 
+    /// offload without parallel works but is very slow
+    /// parallel without offload works
 #pragma offload target(mic) \
   in(h,hu,hv:length(ncell)), inout(fhu,fhv,ghu,ghv:length(ncell))
     {
 /* #pragma omp parallel */
 /*       { */
-/* #pragma omp parallel for	/\*  *\/ */
+#pragma omp parallel for	/*  */
 	for (int i = 0; i < ncell; ++i) 
 	  {
 	    float hi = h[i], hui = hu[i], hvi = hv[i];
@@ -50,7 +52,7 @@ void shallow2dv_flux(float* restrict fh,
 	    ghu[i] = hui*hvi*inv_h;
 	    ghv[i] = hvi*hvi*inv_h + (0.5f*g)*hi*hi;
 	  }
-      }
+    }
     /* } */
 }
 

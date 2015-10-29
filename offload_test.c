@@ -8,7 +8,7 @@
 int main(){
   
   double *a, *b, *c, *d;
-  int i,j,k, ok, n=20;
+  int i,j,k, ok, n=10;
   
   // allocated memory on the heap aligned to 64 byte boundary
   /* ok = posix_memalign((void**)&a, 64, n*n*sizeof(double)); */
@@ -16,16 +16,21 @@ int main(){
   /* ok = posix_memalign((void**)&c, 64, n*n*sizeof(double)); */
 
   // initialize matrices
-  a = malloc(n*n*sizeof(double));
-  /* b = a + n*n; */
-  b = malloc(n*n*sizeof(double));
-  c = malloc(n*n*sizeof(double));
+  /* a = malloc(n*n*sizeof(double)); */
+  /* b = malloc(n*n*sizeof(double)); */
+  /* c = malloc(n*n*sizeof(double)); */
+
+  a = malloc(3*n*n*sizeof(double));
+  b = a + n*n;
+  c = a + 2*n*n;
+  /* c = malloc(n*n*sizeof(double)); */
   /* d = c + n*n; */
 
   for(i = 0; i < n*n; i++)
     {
       a[i] = 3;
       b[i] = 0;
+      c[i] = 0;
     }
   for(i = 0; i < n; i++)
     {
@@ -33,10 +38,10 @@ int main(){
     }
 
   //offload code
-/* #pragma offload target(mic) in(a,b:length(n*n)) out(c:length(n*n)) */
+#pragma offload target(mic) in(a,b:length(n*n)) out(c:length(n*n))
   {
     //parallelize via OpenMP on MIC
-/* #pragma omp parallel for */
+#pragma omp parallel for
     for( i = 0; i < n; i++ ) {
       for( k = 0; k < n; k++ ) {
 	/* #pragma vector aligned */
@@ -44,7 +49,7 @@ int main(){
 	for( j = 0; j < n; j++ ) {
 	  //c[i][j] = c[i][j] + a[i][k]*b[k][j];
 	  /* c[i*n+j] = c[i*n+j] + a[i*n+k]*b[k*n+j]; */
-	  c[i*n+j] = a[i*n+k]*b[k*n+j];
+	  c[i*n+j] += a[i*n+k]*b[k*n+j];
 	  /* d[i*n+j] = a[i*n+k]*b[k*n+j]; */
 	}
       }
